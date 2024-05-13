@@ -8,6 +8,7 @@ import Plots.plot
 export parse_model, @vam, @stop, params, params!, nbparams, data, data!, simulator, sim, simulate, mle, bayesian
 export contrast, gradient, hessian
 export plot
+export np, CountingProcessInVA, AtRiskInVA, SmoothHazardRateInVA, SmoothCumHazardRateInVA, dSmoothCumHazardRateInVA, ContrastNP
 
 
 abstract type AbstractModel end
@@ -30,5 +31,6 @@ include("plots.jl")
 include("simulate.jl")
 include("mle.jl")
 include("bayesian.jl")
+include("np.jl")
 
 end
