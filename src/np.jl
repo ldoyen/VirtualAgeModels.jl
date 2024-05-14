@@ -81,11 +81,11 @@ function NP(model::Model , bandwidth::Float64 , data::DataFrame=DataFrame(); ker
     init!(np.model)
     ## only if not already set!
     ###like MLE but why ??
-    np.data = data
-    if data==DataFrame()
-        np.data = np.model.data 
-        #data!(np.model, data, DataFrame())#covariates not considered in this case for now
+    if !isempty(data)
+        data!(np.model, data, DataFrame())#covariates not considered in this case for now
     end
+    np.data = np.model.data
+    np.t_max = np.t_max_data
     init!(np)
     return np
 end
@@ -97,20 +97,29 @@ end
 
 function NP_Compute!(np::NP , t_max::Float64=np.t_max_data ; gradient::Bool=false, hessian::Bool=false )
     np.is_V_computed=true
-    np.t_max=t_max
+    if np.t_max != t_max
+        np.t_max = t_max
+        data_compute = np.data
+        for k in 1:np.model.nb_system
+            n = sum(data_compute[k][!,1] .<= np.t_max)
+            println("sys=$k, n=$n, $((size(data_compute[k]))[1]) ")
+            if n < ((size(data_compute[k]))[1])#adding end of observation calendar time in data
+                println("sys=$k")
+                println((data_compute[k])[1:(n+1) , :])
+                println( np.t_max)
+                data_compute[k] = (data_compute[k])[1:(n+1) , :]
+                data_compute[k][n+1 , 1] = np.t_max
+                data_compute[k][n+1 , 2] = 0#like censoring
+                
+            end
+        end
+        data!(np.model, data_compute)
+    end
+    
     i = 1   
     for k in 1:np.model.nb_system
         data!(np.model, k)
         n = sum(np.model.time .<= np.t_max)
-        change_lasttime = false
-        if n<length(np.model.time)#adding end of observation calendar time in data
-            change_lasttime = true
-            n = n+1
-            last_time = np.model.time[n]
-            last_type = np.model.type[n]
-            np.model.time[n] = np.t_max
-            np.model.type[n] = 0#like censoring
-        end
 
         #init
         for mm in np.model.models
@@ -164,11 +173,6 @@ function NP_Compute!(np::NP , t_max::Float64=np.t_max_data ; gradient::Bool=fals
             end
             #//model.indMode = (type < 0 ? 0 : type);
             update_maintenance!(np.model, type, gradient=gradient, hessian=hessian)
-        end
-
-        if change_lasttime #put back last data value if changed
-            np.model.time[n] = last_time
-            np.model.type[n] = last_type
         end
     end
     np.lengthSortPerm_atRiIn = i-1

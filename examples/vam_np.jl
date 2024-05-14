@@ -3,16 +3,20 @@ using DataFrames
 using Plots
 using LaTeXStrings
 
-df = DataFrame(System =[1,1,1,1,1,1,2,2,2,2], Time=[3.3,4.0,4.9,5.1,6.4,6.8,2.4,4.5,5.4,6.8], Type=[-1,-1,-1,-1,-1,0,-1,-1,-1,0])
+df = DataFrame(System =[1,1,1,1,1,1,2,2,2,2], Time=[3.3,4.0,4.9,5.1,6.4,6.7,2.4,4.5,5.4,6.7], Type=[-1,-1,-1,-1,-1,0,-1,-1,-1,0])
 m = @vam System & Time & Type ~ (ARAInf(0.4) | Weibull(0.001,2.5)) 
 θ = [0.3,1.4,0.6]
 mNP = np(m, 1.0, df)
+size(mNP.model.data[1])[1]
+
 
 VirtualAgeModels.NP_Compute!(mNP,6.,gradient=true)
 mNP.Bound_atRiIn[mNP.SortPerm_atRiIn]
 
-N_V = CountingProcessInVA(mNP,[0.4],6.)
-Y_V = AtRiskInVA(mNP,[0.4], 6.)
+
+tmax = 5.8
+N_V = CountingProcessInVA(mNP,[0.4],tmax)
+Y_V = AtRiskInVA(mNP,[0.4], tmax)
 data!(mNP.model, 1)
 infos1 = VirtualAgeModels.virtual_age_infos(mNP.model, mNP.model.time[1], mNP.model.time[end], type=:v)
 infos1
