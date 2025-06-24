@@ -11,6 +11,9 @@ size(mNP.model.data[1])[1]
 
 
 VirtualAgeModels.NP_Compute!(mNP,6.,gradient=true)
+mNP.model.data
+mNP.data
+
 mNP.Bound_atRiIn[mNP.SortPerm_atRiIn]
 
 
@@ -29,7 +32,7 @@ p1 = plot(infos1.x,infos1.y, color=:blue, legend=nothing, ylims=(0, maxy))
 #infos2.y[1] = infos2.y[1] .+ epsilon
 tick = (Y_V[!,3], repeat([""],length(Y_V[!,3])))
 p1 = plot!(infos2.x, infos2.y, yticks = tick, xticks=[0], color=:red, legend=nothing, xlabel = "Calendar time", ylabel = "Virtual Age")
-p1 = plot!([6], seriestype = :vline, color="black")
+p1 = plot!([tmax], seriestype = :vline, color="black")
 p1 = scatter!(maximum.(infos1.x[1:(end-1)]), maximum.(infos1.y[1:(end-1)]), legend=nothing, markershape = :x, markercolor= "blue")
 p1 = scatter!(maximum.(infos2.x[1:(end-1)]), maximum.(infos2.y[1:(end-1)]), legend=nothing, markershape = :x, markercolor= "red")
 x = zeros(length(N_V[!,2]) + 1)
